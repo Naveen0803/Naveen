@@ -1,104 +1,69 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+# Importing packages
 
-# C extensions
-*.so
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+import streamlit as st
+from textblob import TextBlob
+from firebase import firebase
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+#Creating a webpage using Streamlit library
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
 
-# Translations
-*.mo
-*.pot
+st.title("Sentiment Analysis")
+name=st.text_area("Name")
+Email=st.text_area("Email")
+message=st.text_area("Please Enter the Text")
+str1=""
+integer=0
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
+# Firebase database Connection
 
-# Flask stuff:
-instance/
-.webassets-cache
 
-# Scrapy stuff:
-.scrapy
+firebase=firebase.FirebaseApplication("https://pythondbtest-f5379-default-rtdb.firebaseio.com/",None)
 
-# Sphinx documentation
-docs/_build/
+# Sentimental Analysis Code
 
-# PyBuilder
-target/
 
-# Jupyter Notebook
-.ipynb_checkpoints
+if st.button("SUBMIT"):
+    blob=TextBlob(message)
+    result_sentiment=blob.sentiment
 
-# pyenv
-.python-version
 
-# celery beat schedule file
-celerybeat-schedule
+    if  result_sentiment.polarity>0:
+        str1="positive"
+        st.success("positive")
+        st.bar_chart(result_sentiment,result_sentiment.polarity)
+        st.success(result_sentiment)
+        integer=result_sentiment.polarity
 
-# SageMath parsed files
-*.sage.py
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+    elif  result_sentiment.polarity<0:
+        str1 = "Negative"
+        st.success("Negative")
+        st.bar_chart(result_sentiment)
+        st.success(result_sentiment)
+        integer = result_sentiment.polarity
 
-# Spyder project settings
-.spyderproject
-.spyproject
 
-# Rope project settings
-.ropeproject
+    else:
+        st.bar_chart(result_sentiment)
+        st.success("Neutral")
+        str1 = "Neutral"
+        integer=result_sentiment.polarity
 
-# mkdocs documentation
-/site
+# Datas collected to store in the Database
 
-# mypy
-.mypy_cache/
+
+data={
+    'Name':name,
+      'Email':Email,
+      'Message':message,
+      'Sentiment':str1,
+      'Polarity':integer
+      }
+
+# Output
+
+
+result=firebase.post('pythondbtest-f5379-default-rtdb/Customer:',data)
+print(result)
